@@ -1,0 +1,29 @@
+{
+    "private": true,
+    "workspaces": [
+        "worker",
+        "pages"
+    ],
+    "dependencies": {
+        "next": "14.2.4",
+        "react": "^18",
+        "react-dom": "^18"
+    },
+    "devDependencies": {
+        "@cloudflare/next-on-pages": "^1.11.3",
+        "@cloudflare/vitest-pool-workers": "^0.4.5",
+        "@cloudflare/workers-types": "^4.20240614.0",
+        "@types/react": "^18",
+        "@types/react-dom": "^18",
+        "eslint": "^8",
+        "eslint-config-next": "14.2.4",
+        "eslint-plugin-next-on-pages": "^1.11.3",
+        "typescript": "^5",
+        "vercel": "^32.3.0",
+        "vitest": "1.5.0",
+        "wrangler": "^3.61.0"
+    },
+    "overrides": {
+        "@types/node": "20.8.3"
+    }
+}
