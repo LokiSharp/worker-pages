@@ -1,25 +1,25 @@
-// test/index.spec.ts
-import { env, createExecutionContext, waitOnExecutionContext, SELF } from 'cloudflare:test';
-import { describe, it, expect } from 'vitest';
-import worker from '../src/index';
+import { SELF } from 'cloudflare:test';
+import { describe, it, expect, vi } from 'vitest';
 
-// For now, you'll need to do something like this to get a correctly-typed
-// `Request` to pass to `worker.fetch()`.
-const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
+describe('handleFetchRequest', () => {
+    it('should return a 405 response for non-POST requests', async () => {
+        const response = await SELF.fetch('https://example.com');
+        expect(response.status).toBe(405);
+        expect(await response.text()).toMatchInlineSnapshot(`"Remote worker is working..."`);
+    });
 
-describe('Hello World worker', () => {
-	it('responds with Hello World! (unit style)', async () => {
-		const request = new IncomingRequest('http://example.com');
-		// Create an empty context to pass to `worker.fetch()`.
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
-		// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
-		await waitOnExecutionContext(ctx);
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
-	});
+    it('should return a 404 response if the target is not found', async () => {
+        const response = await SELF.fetch('https://example.com', { method: 'POST', body: JSON.stringify({ target: 'unknown-id' }) });
+        expect(response.status).toBe(404);
+        expect(await response.text()).toMatchInlineSnapshot(`"Target Not Found"`);
+    });
 
-	it('responds with Hello World! (integration style)', async () => {
-		const response = await SELF.fetch('https://example.com');
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
-	});
+    it('should return a JSON response with the worker location and status', async () => {
+        vi.spyOn(global, 'fetch').mockResolvedValueOnce(
+            new Response(null, { status: 200, })
+        );
+        const response = await SELF.fetch('https://example.com', { method: 'POST', body: JSON.stringify({ target: 'Example' }) });
+        expect(response.status).toBe(200);
+        expect(await response.json()).toBeTruthy()
+    });
 });
